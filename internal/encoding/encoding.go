@@ -14,10 +14,16 @@ type RSAEncoder interface {
 }
 
 func GetRSAEncoder(conf config.Config) RSAEncoder {
+	switch conf.Encoding {
+	case "pem":
+		return PEM{}
+	case "der":
+		return DER{}
+	}
 	return PEM{}
 }
 
-type PEM struct {}
+type PEM struct{}
 
 func (p PEM) EncodePrivateKey(key *rsa.PrivateKey) ([]byte, error) {
 	buf := &bytes.Buffer{}
@@ -29,4 +35,9 @@ func (p PEM) EncodePrivateKey(key *rsa.PrivateKey) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-type DER struct {}
+type DER struct{}
+
+func (d DER) EncodePrivateKey(key *rsa.PrivateKey) ([]byte, error) {
+	der := x509.MarshalPKCS1PrivateKey(key)
+	return der, nil
+}

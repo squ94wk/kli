@@ -15,11 +15,14 @@ type Module interface {
 }
 
 func GetModule(conf config.Config) Module {
-	return RSA{
-		rng:    rand.New(rand.NewSource(0)),
-		length: 4096,
-		enc:    encoding.GetRSAEncoder(conf),
+	if conf.Algorithm == "rsa" {
+		return RSA{
+			rng:    rand.New(rand.NewSource(0)),
+			length: 4096,
+			enc:    encoding.GetRSAEncoder(conf),
+		}
 	}
+	panic("invalid algorithm")
 }
 
 type RSA struct {
