@@ -1,9 +1,8 @@
-package cli
+package output
 
 import "os"
 
 type CommandLine struct {
-
 }
 
 func (c *CommandLine) Write(buf []byte) (int, error) {

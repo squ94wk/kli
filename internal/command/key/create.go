@@ -1,6 +1,9 @@
 package key
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/squ94wk/kli/internal/cli"
 	"github.com/squ94wk/kli/internal/config"
 )
@@ -10,7 +13,6 @@ func NewCreateCmd() Create {
 }
 
 type Create struct {
-
 }
 
 func (c Create) Match(conf config.Config) bool {
@@ -27,7 +29,16 @@ func (c Create) Match(conf config.Config) bool {
 	return true
 }
 
-func (c Create) Run(conf config.Config, cli cli.CLI) {
-	_, _ = cli.Write([]byte("create key"))
-	// create key
+func (c Create) Run(conf config.Config, cli *cli.CLI) {
+	key, err := cli.Crypto.GenerateKey()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	buf, err := cli.Crypto.EncodePrivateKey(key)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%s", string(buf))
 }

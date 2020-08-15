@@ -11,7 +11,7 @@ type Commander struct {
 
 type Command interface {
 	Match(config.Config) bool
-	Run(config.Config, cli.CLI)
+	Run(config.Config, *cli.CLI)
 }
 
 func (c *Commander) GetCommand(conf config.Config) Command {

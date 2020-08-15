@@ -8,4 +8,3 @@ func Init() Commander {
 
 	return cmder
 }
-
