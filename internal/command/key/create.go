@@ -35,7 +35,7 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 		log.Fatal(err)
 	}
 
-	buf, err := cli.Crypto.EncodePrivateKey(key)
+	buf, err := cli.Encoder.Encode(key)
 	if err != nil {
 		log.Fatal(err)
 	}

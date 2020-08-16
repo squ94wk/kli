@@ -5,15 +5,16 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 
 	"github.com/squ94wk/kli/internal/config"
 )
 
-type RSAEncoder interface {
-	EncodePrivateKey(*rsa.PrivateKey) ([]byte, error)
+type Encoder interface {
+	Encode(interface{}) ([]byte, error)
 }
 
-func GetRSAEncoder(conf config.Config) RSAEncoder {
+func GetEncoder(conf config.Config) Encoder {
 	switch conf.Encoding {
 	case "pem":
 		return PEM{}
@@ -25,19 +26,42 @@ func GetRSAEncoder(conf config.Config) RSAEncoder {
 
 type PEM struct{}
 
-func (p PEM) EncodePrivateKey(key *rsa.PrivateKey) ([]byte, error) {
+func (p PEM) Encode(doc interface{}) ([]byte, error) {
 	buf := &bytes.Buffer{}
-	pemBlock := &pem.Block{
-		Type:  "PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(key),
+	switch doc.(type) {
+	case *rsa.PrivateKey:
+		key := doc.(*rsa.PrivateKey)
+		pemBlock := &pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: x509.MarshalPKCS1PrivateKey(key),
+		}
+		err := pem.Encode(buf, pemBlock)
+		return buf.Bytes(), err
+	case *x509.Certificate:
+		cert := doc.(*x509.Certificate)
+		pemBlock := &pem.Block{
+			Type:  "CERTIFICATE",
+			Bytes: cert.Raw,
+		}
+		err := pem.Encode(buf, pemBlock)
+		return buf.Bytes(), err
+	default:
+		panic(fmt.Sprintf("no PEM encoder for type %T", doc))
 	}
-	err := pem.Encode(buf, pemBlock)
-	return buf.Bytes(), err
 }
 
 type DER struct{}
 
-func (d DER) EncodePrivateKey(key *rsa.PrivateKey) ([]byte, error) {
-	der := x509.MarshalPKCS1PrivateKey(key)
-	return der, nil
+func (d DER) Encode(doc interface{}) ([]byte, error) {
+	switch doc.(type) {
+	case *rsa.PrivateKey:
+		key := doc.(*rsa.PrivateKey)
+		der := x509.MarshalPKCS1PrivateKey(key)
+		return der, nil
+	case *x509.Certificate:
+		cert := doc.(*x509.Certificate)
+		return cert.Raw, nil
+	default:
+		panic(fmt.Sprintf("no PEM encoder for type %T", doc))
+	}
 }
