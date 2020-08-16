@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"io"
-
 	"github.com/squ94wk/kli/internal/config"
 	"github.com/squ94wk/kli/internal/crypt"
 	"github.com/squ94wk/kli/internal/encoding"
@@ -11,10 +9,10 @@ import (
 )
 
 type CLI struct {
-	Output io.Writer
-	Crypto crypt.Module
+	Output  output.Module
+	Crypto  crypt.Module
 	Encoder encoding.Encoder
-	Format format.Module
+	Format  format.Module
 }
 
 func GetCLI(conf config.Config) *CLI {
@@ -24,9 +22,9 @@ func GetCLI(conf config.Config) *CLI {
 	encoder := encoding.GetEncoder(conf)
 
 	return &CLI{
-		Output: outMod,
-		Crypto: cryptMod,
-		Format: formatMod,
+		Output:  outMod,
+		Crypto:  cryptMod,
+		Format:  formatMod,
 		Encoder: encoder,
 	}
 }

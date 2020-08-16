@@ -44,12 +44,12 @@ func (i Inspect) Run(conf config.Config, cli *cli.CLI) {
 		log.Fatal(err)
 	}
 
-	buf, err := cli.Format.Format(obj)
+	pretty, err := cli.Format.Format(obj)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = cli.Output.Write(buf)
+	err = cli.Output.WriteType(pretty)
 	if err != nil {
 		log.Fatal(err)
 	}

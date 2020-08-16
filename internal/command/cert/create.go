@@ -69,7 +69,12 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 		log.Fatal(err)
 	}
 
-	_, err = cli.Output.Write(buf)
+	pretty, err := cli.Format.Format(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = cli.Output.WriteType(pretty)
 	if err != nil {
 		log.Fatal(err)
 	}
