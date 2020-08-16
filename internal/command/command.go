@@ -9,6 +9,7 @@ func Init() Commander {
 	var cmder Commander
 	cmder.AddCommand(key.NewCreateCmd())
 	cmder.AddCommand(cert.NewCreateCmd())
+	cmder.AddCommand(NewInspectCmd())
 
 	return cmder
 }
