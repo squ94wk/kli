@@ -1,14 +1,17 @@
 package cert
 
 import (
+	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"io/ioutil"
 	"log"
 	"math/big"
 	"time"
 
 	"github.com/squ94wk/kli/internal/cli"
 	"github.com/squ94wk/kli/internal/config"
+	"github.com/squ94wk/kli/pkg/codec"
 )
 
 type Create struct {}
@@ -32,9 +35,24 @@ func (c Create) Match(conf config.Config) bool {
 }
 
 func (c Create) Run(conf config.Config, cli *cli.CLI) {
-	key, err := cli.Crypto.GenerateKey()
-	if err != nil {
-		log.Fatal(err)
+	var key *rsa.PrivateKey
+	if conf.Key == "" {
+		var err error
+		key, err = cli.Crypto.GenerateKey()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		keyFile, err := ioutil.ReadFile(conf.Key)
+		if err != nil {
+			log.Fatal(err)
+		}
+		any, err := codec.ParseAny(keyFile)
+		var ok bool
+		key, ok = any.(*rsa.PrivateKey)
+		if !ok {
+			log.Fatal(err)
+		}
 	}
 
 	rootTemp := x509.Certificate{
