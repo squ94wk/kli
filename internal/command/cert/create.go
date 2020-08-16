@@ -3,7 +3,6 @@ package cert
 import (
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"fmt"
 	"log"
 	"math/big"
 	"time"
@@ -70,5 +69,8 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s", string(buf))
+	_, err = cli.Output.Write(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

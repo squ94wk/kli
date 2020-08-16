@@ -4,13 +4,13 @@
 //   - file
 package output
 
-import "github.com/squ94wk/kli/internal/config"
+import (
+	"io"
+	"os"
 
-type Module interface {
+	"github.com/squ94wk/kli/internal/config"
+)
+
+func GetModule(conf config.Config) io.Writer {
+	return os.Stdout
 }
-
-func GetModule(conf config.Config) Module {
-	return Output{}
-}
-
-type Output struct {}

@@ -1,7 +1,6 @@
 package key
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/squ94wk/kli/internal/cli"
@@ -40,5 +39,8 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%s", string(buf))
+	_, err = cli.Output.Write(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

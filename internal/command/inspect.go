@@ -44,9 +44,15 @@ func (i Inspect) Run(conf config.Config, cli *cli.CLI) {
 		log.Fatal(err)
 	}
 
-	bytes, err := cli.Format.Format(obj)
+	buf, err := cli.Format.Format(obj)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	fmt.Printf("%s", string(bytes))
+	_, err = cli.Output.Write(buf)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func ParseAny(bytes []byte) (interface{}, error) {

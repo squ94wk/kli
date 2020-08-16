@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"io"
+
 	"github.com/squ94wk/kli/internal/config"
 	"github.com/squ94wk/kli/internal/crypt"
 	"github.com/squ94wk/kli/internal/encoding"
@@ -9,7 +11,7 @@ import (
 )
 
 type CLI struct {
-	Output output.Module
+	Output io.Writer
 	Crypto crypt.Module
 	Encoder encoding.Encoder
 	Format format.Module
