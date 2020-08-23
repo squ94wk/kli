@@ -8,7 +8,8 @@ type Config struct {
 	Encoding  string
 
 	Type string
-	Key string
+	Keys []string
+	CA   []string
 }
 
 func Configure() Config {
@@ -31,7 +32,8 @@ func ParseArgs(conf *Config) {
 	flag.StringVar(&conf.Algorithm, "alg", conf.Algorithm, "Cryptography algorithm [rsa]")
 	flag.StringVar(&conf.Encoding, "enc", conf.Encoding, "Key encoding [pem, der]")
 	flag.StringVar(&conf.Type, "type", conf.Type, "Certificate type")
-	flag.StringVar(&conf.Key, "key", conf.Key, "Private Key to use for certificate")
+	flag.StringSliceVar(&conf.Keys, "key", conf.Keys, "key to use for new certificate or keys corresponding to CA certs")
+	flag.StringSliceVar(&conf.CA, "ca", conf.CA, "CA certificate(s) for signing")
 	flag.Parse()
 	conf.Args = flag.Args()
 }
