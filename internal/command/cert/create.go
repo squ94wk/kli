@@ -1,7 +1,7 @@
 package cert
 
 import (
-	"crypto/rsa"
+	"crypto"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"log"
@@ -34,8 +34,8 @@ func (c Create) Match(conf config.Config) bool {
 }
 
 func (c Create) Run(conf config.Config, cli *cli.CLI) {
-	var key *rsa.PrivateKey
-	signers, leftover, err := signing.MatchKeys(conf)
+	var key crypto.Signer
+	signers, leftover, err := signing.MatchKeys(cli.Inputs.Keys, cli.Inputs.Certs)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,7 +49,7 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 			log.Fatal(err)
 		}
 	case 1:
-		key = leftover[0]
+		key = leftover[0].Key
 	default:
 		log.Fatal("choosing key for new certificate is ambiguous: found 2 or more keys that don't belong to a certificate")
 	}
@@ -58,17 +58,17 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 	var cert *x509.Certificate
 	var parentCert *x509.Certificate
 	switch {
-	case len(conf.CA) > 1:
+	case len(cli.Inputs.Certs) > 1:
 		log.Fatal("cross signing cert is not supported (yet)")
-	case len(conf.CA) > len(signers):
+	case len(cli.Inputs.Certs) > len(signers):
 		log.Fatal("missing key for some certificate(s)")
 
-	case len(conf.CA) == 0:
+	case len(cli.Inputs.Certs) == 0:
 		// self sign
 		rootTemp := x509.Certificate{
 			SignatureAlgorithm: x509.SHA256WithRSAPSS,
 			PublicKeyAlgorithm: x509.RSA,
-			PublicKey:          key.PublicKey,
+			PublicKey:          key.Public(),
 			SerialNumber:       big.NewInt(time.Now().UnixNano()),
 			Issuer: pkix.Name{
 				CommonName: "Root CA",
@@ -82,7 +82,7 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 			MaxPathLenZero: false,
 		}
 
-		rootCARaw, err := x509.CreateCertificate(cli.Crypto.Rand(), &rootTemp, &rootTemp, &key.PublicKey, key)
+		rootCARaw, err := x509.CreateCertificate(cli.Crypto.Rand(), &rootTemp, &rootTemp, key.Public(), key)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -92,7 +92,7 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 			log.Fatal(err)
 		}
 
-		certDer, err := x509.CreateCertificate(cli.Crypto.Rand(), parentCert, parentCert, &key.PublicKey, key)
+		certDer, err := x509.CreateCertificate(cli.Crypto.Rand(), parentCert, parentCert, key.Public(), key)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -101,14 +101,14 @@ func (c Create) Run(conf config.Config, cli *cli.CLI) {
 			log.Fatal(err)
 		}
 
-	case len(conf.CA) == 1:
-		var signingKey *rsa.PrivateKey
+	case len(cli.Inputs.Certs) == 1:
+		var signingKey crypto.Signer
 		for cert, key := range signers {
-			parentCert = cert
-			signingKey = key
+			parentCert = cert.Cert
+			signingKey = key.Key
 		}
 
-		certDer, err := x509.CreateCertificate(cli.Crypto.Rand(), parentCert, parentCert, &key.PublicKey, signingKey)
+		certDer, err := x509.CreateCertificate(cli.Crypto.Rand(), parentCert, parentCert, key.Public(), signingKey)
 		if err != nil {
 			log.Fatal(err)
 		}

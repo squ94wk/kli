@@ -1,12 +1,12 @@
 package command
 
 import (
-	"io/ioutil"
+	"fmt"
 	"log"
 
 	"github.com/squ94wk/kli/internal/cli"
 	"github.com/squ94wk/kli/internal/config"
-	"github.com/squ94wk/kli/pkg/codec"
+	"github.com/squ94wk/kli/internal/reference"
 )
 
 type Inspect struct {}
@@ -32,14 +32,12 @@ func (i Inspect) Run(conf config.Config, cli *cli.CLI) {
 		log.Fatal("only accept exactly one argument")
 	}
 	target := args[0]
-	content, err := ioutil.ReadFile(target)
+	obj, err := reference.ResolveAny(target, cli.Resolver)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("failed to resolve reference '%s': %w", target, err))
 	}
-
-	obj, err := codec.ParseAny(content)
-	if err != nil {
-		log.Fatal(err)
+	if obj == nil {
+		log.Fatal(fmt.Errorf("couldn't resolve reference"))
 	}
 
 	pretty, err := cli.Format.Format(obj)

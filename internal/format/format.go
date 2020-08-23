@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/squ94wk/kli/internal/config"
+	"github.com/squ94wk/kli/internal/reference"
 )
 
 type Type interface {
@@ -34,15 +35,19 @@ func GetModule(conf config.Config) Module {
 type formatter struct{}
 
 func (f formatter) Format(obj interface{}) (Type, error) {
-	switch obj.(type) {
+	switch o := obj.(type) {
 	case []byte:
-		return Binary(obj.([]byte)), nil
+		return Binary(o), nil
 	case *rsa.PrivateKey:
-		return RSAPrivateKey(*obj.(*rsa.PrivateKey)), nil
+		return RSAPrivateKey(*o), nil
 	case *rsa.PublicKey:
-		return RSAPublicKey(*obj.(*rsa.PublicKey)), nil
+		return RSAPublicKey(*o), nil
 	case *x509.Certificate:
-		return Certificate(*obj.(*x509.Certificate)), nil
+		return Certificate(*o), nil
+	case *reference.Key:
+		return f.Format(o.Key)
+	case *reference.Cert:
+		return f.Format(o.Cert)
 	default:
 		return nil, fmt.Errorf("can't format %T", obj)
 	}

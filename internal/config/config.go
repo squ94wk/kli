@@ -1,6 +1,8 @@
 package config
 
-import flag "github.com/spf13/pflag"
+import (
+	flag "github.com/spf13/pflag"
+)
 
 type Config struct {
 	Args      []string
@@ -8,8 +10,9 @@ type Config struct {
 	Encoding  string
 
 	Type string
-	Keys []string
-	CA   []string
+
+	Keys  []string
+	Certs []string
 }
 
 func Configure() Config {
@@ -33,7 +36,7 @@ func ParseArgs(conf *Config) {
 	flag.StringVar(&conf.Encoding, "enc", conf.Encoding, "Key encoding [pem, der]")
 	flag.StringVar(&conf.Type, "type", conf.Type, "Certificate type")
 	flag.StringSliceVar(&conf.Keys, "key", conf.Keys, "key to use for new certificate or keys corresponding to CA certs")
-	flag.StringSliceVar(&conf.CA, "ca", conf.CA, "CA certificate(s) for signing")
+	flag.StringSliceVar(&conf.Certs, "ca", conf.Certs, "CA certificate(s) for signing")
 	flag.Parse()
 	conf.Args = flag.Args()
 }
